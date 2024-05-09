@@ -5,6 +5,7 @@ import Swal from 'sweetalert2'
 
 const data = ref(null)
 let isEditing = ref(false)
+const searchTerm = ref('')
 
 const url = 'http://localhost:8080/api/v1/estudiante'
 
@@ -91,6 +92,37 @@ const limpiar = () => {
   estudiante.value = { id: '', nombre: '', direccion: '', telefono: '' }
 }
 
+const buscarEstudiante = () => {
+  const estudiantesEncontrados = data.value.filter(
+    (estudiante) => estudiante.nombre === searchTerm.value
+  )
+  if (estudiantesEncontrados.length > 0) {
+    // Mostrar SweetAlert con los datos de los estudiantes encontrados
+    let html = ''
+    estudiantesEncontrados.forEach((estudiante, index) => {
+      html += `
+      <div class="mb-4">
+        <h3 class="font-bold">Estudiante ${index + 1}</h3>
+        <p><b>Nombre:</b> ${estudiante.nombre}</p>
+        <p><b>Dirección:</b> ${estudiante.direccion}</p>
+        <p><b>Teléfono:</b> ${estudiante.telefono}</p>
+      </div>
+      `
+    })
+    Swal.fire({
+      title: 'Estudiantes Encontrados',
+      html: html,
+      icon: 'success'
+    })
+  } else {
+    Swal.fire({
+      title: 'Estudiante No Encontrado',
+      text: 'No se encontró ningún estudiante con el nombre proporcionado',
+      icon: 'warning'
+    })
+  }
+}
+
 onMounted(getEstudiantes)
 </script>
 
@@ -101,10 +133,44 @@ onMounted(getEstudiantes)
         Crud Estudiante
       </h2>
     </div>
+
     <div
       class="bg-white shadow-lg overflow-hidden sm:rounded-lg mb-4 border border-collapse border-gray-300"
     >
-      <div class="p-6">
+      <form @submit.prevent="buscarEstudiante">
+        <div class="m-5 text-gray-600 flex">
+          <label for="search" class="mr-2 my-auto font-semibold">Buscar Estudiante:</label>
+          <input
+            v-model="searchTerm"
+            class="border-2 border-gray-300 bg-white h-10 px-3 rounded-lg text-sm focus:outline-none"
+            type="search"
+            name="search"
+            placeholder="Search"
+          />
+          <button type="submit" class="ml-2">
+            <svg
+              class="text-green-500 h-4 w-4 fill-current hover:text-green-700"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              version="1.1"
+              id="Capa_1"
+              x="0px"
+              y="0px"
+              viewBox="0 0 56.966 56.966"
+              style="enable-background: new 0 0 56.966 56.966"
+              xml:space="preserve"
+              width="512px"
+              height="512px"
+            >
+              <path
+                d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z"
+              />
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <div class="px-6 pb-6">
         <form @submit.prevent="guardarEstudiante" class="space-y-4">
           <input type="hidden" v-model="estudiante.id" />
           <div class="flex flex-col sm:flex-row sm:space-x-4">
